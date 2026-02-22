@@ -6,14 +6,12 @@
     <title>Сова Мудрості 🦉</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
         }
-
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -22,432 +20,387 @@
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-
         .screen { display: none; }
         .screen.active { display: block; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-        h1, h2 { color: #333; margin-bottom: 20px; text-align: center; }
-        h1 { font-size: 2em; }
-        h2 { font-size: 1.5em; }
-
-        .menu-buttons { display: flex; flex-direction: column; gap: 15px; }
+        h1, h2 { color:#333; margin-bottom:20px; text-align:center; }
+        h1 { font-size:2em; } h2 { font-size:1.5em; }
+        .menu-buttons { display:flex; flex-direction:column; gap:15px; }
 
         button {
-            padding: 15px 20px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            color: white;
+            padding:15px 20px; font-size:1.1em; border:none;
+            border-radius:10px; cursor:pointer; transition:all 0.3s;
+            font-weight:bold; color:white;
         }
-        button:active { transform: scale(0.95); }
-        button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .btn-secondary { background: #48bb78; }
-        .btn-danger { background: #f56565; }
-        .btn-action { flex: 1; padding: 12px; font-size: 1em; }
-        button:hover:not(:disabled) { opacity: 0.9; }
-
-        .nickname-form { display: flex; flex-direction: column; gap: 15px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-weight: bold; margin-bottom: 8px; color: #333; }
+        button:active { transform:scale(0.95); }
+        button:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+        .btn-primary { background:linear-gradient(135deg,#667eea,#764ba2); }
+        .btn-secondary { background:#48bb78; }
+        .btn-danger { background:#f56565; }
+        .btn-action { flex:1; padding:12px; font-size:1em; }
+        button:hover:not(:disabled) { opacity:0.9; }
 
         input[type="text"] {
-            padding: 12px; border: 2px solid #ddd;
-            border-radius: 8px; font-size: 1em;
+            padding:12px; border:2px solid #ddd;
+            border-radius:8px; font-size:1em; width:100%;
         }
-        input[type="text"]:focus { outline: none; border-color: #667eea; }
-        input[type="file"] { display: none; }
+        input[type="text"]:focus { outline:none; border-color:#667eea; }
+        input[type="file"] { display:none; }
 
-        /* SETUP */
+        .form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:15px; }
+        label { font-weight:bold; color:#333; }
+
+        /* UPLOAD */
         .upload-zone {
-            border: 3px dashed #667eea;
-            border-radius: 12px;
-            padding: 30px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f7ff;
-            margin: 10px 0;
+            border:3px dashed #667eea; border-radius:12px;
+            padding:30px 20px; text-align:center; cursor:pointer;
+            background:#f8f7ff; transition:all 0.3s;
         }
-        .upload-zone:hover { background: #ede9ff; border-color: #764ba2; }
-        .upload-zone.has-files { border-style: solid; background: #f0fff4; border-color: #48bb78; }
-        .upload-icon { font-size: 3em; margin-bottom: 10px; }
-        .upload-text { color: #667eea; font-weight: bold; font-size: 1.1em; }
-        .upload-sub { color: #999; font-size: 0.85em; margin-top: 5px; }
+        .upload-zone:hover { background:#ede9ff; }
+        .upload-zone.done { border-style:solid; background:#f0fff4; border-color:#48bb78; }
+        .upload-icon { font-size:3em; margin-bottom:8px; }
+        .upload-text { color:#667eea; font-weight:bold; font-size:1.1em; }
+        .upload-sub { color:#999; font-size:0.82em; margin-top:5px; }
 
         .images-preview {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin: 12px 0;
+            display:grid; grid-template-columns:repeat(5,1fr);
+            gap:8px; margin:12px 0;
         }
         .preview-slot {
-            aspect-ratio: 2/3;
-            border-radius: 8px;
-            border: 2px solid #eee;
-            overflow: hidden;
-            position: relative;
-            background: #f7fafc;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5em; color: #ccc;
+            aspect-ratio:2/3; border-radius:8px; border:2px solid #eee;
+            overflow:hidden; position:relative; background:#f7fafc;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.4em; color:#ccc;
         }
-        .preview-slot img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-slot.is-trump { border: 3px solid #f6ad55; }
-        .preview-slot.is-trump::after {
-            content: '⭐';
-            position: absolute; top: 2px; right: 3px;
-            font-size: 0.8em;
-        }
-        .preview-slot .slot-num {
-            position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-            font-size: 0.5em; background: rgba(0,0,0,0.5);
-            color: white; padding: 1px 5px; border-radius: 4px;
-            font-weight: bold;
+        .preview-slot img { width:100%; height:100%; object-fit:cover; }
+        .preview-slot.trump { border:3px solid #f6ad55; }
+        .preview-slot.trump::after { content:'⭐'; position:absolute; top:2px; right:3px; font-size:0.75em; }
+        .slot-num {
+            position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+            font-size:0.5em; background:rgba(0,0,0,0.5); color:white;
+            padding:1px 5px; border-radius:4px; font-weight:bold;
         }
 
-        .trump-select { margin: 10px 0; }
-        .trump-select label { display: block; margin-bottom: 8px; }
-        .trump-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .trump-select { margin:10px 0; }
+        .trump-btns { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
         .trump-btn {
-            padding: 8px 14px; font-size: 0.85em;
-            background: #eee; color: #333;
-            border-radius: 8px; border: 2px solid #ddd;
+            padding:7px 12px; font-size:0.82em; background:#eee;
+            color:#333; border-radius:8px; border:2px solid #ddd; cursor:pointer;
         }
-        .trump-btn.active { background: #f6ad55; border-color: #ed8936; color: white; }
+        .trump-btn.active { background:#f6ad55; border-color:#ed8936; color:white; }
 
         /* WAITING */
-        .link-section { text-align: center; }
         .link-box {
-            background: #f7fafc; padding: 15px; border-radius: 8px;
-            margin: 20px 0; font-family: 'Courier New', monospace;
-            font-size: 1.4em; color: #2d3748;
-            border: 2px dashed #667eea;
-            letter-spacing: 8px; font-weight: bold;
+            background:#f7fafc; padding:15px; border-radius:8px;
+            margin:15px 0; font-size:2em; color:#333; letter-spacing:10px;
+            font-weight:bold; text-align:center; border:2px dashed #667eea;
         }
-        .btn-copy { background: #4299e1; margin-bottom: 15px; }
-        .copy-success { color: #48bb78; font-weight: bold; margin-top: 10px; min-height: 24px; }
-        .waiting-text { color: #666; margin: 20px 0; font-size: 1.1em; }
+        .copy-success { color:#48bb78; font-weight:bold; text-align:center; min-height:22px; }
         .loader {
-            display: inline-block; width: 20px; height: 20px;
-            border: 3px solid #f3f3f3; border-top: 3px solid #667eea;
-            border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto;
+            display:block; width:24px; height:24px; margin:15px auto;
+            border:3px solid #eee; border-top-color:#667eea;
+            border-radius:50%; animation:spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { to { transform:rotate(360deg); } }
 
         /* GAME */
         .game-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #eee;
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:12px; padding-bottom:12px; border-bottom:2px solid #eee;
         }
-        .player-info { text-align: center; flex: 1; }
-        .player-name { font-weight: bold; font-size: 1.1em; color: #333; }
-        .player-hand-count { color: #666; font-size: 0.9em; margin-top: 5px; }
-        .vs-text { color: #999; margin: 0 10px; }
-
-        .stats-bar {
-            display: flex; justify-content: space-around; gap: 10px;
-            margin-bottom: 15px; background: #f7fafc; padding: 12px; border-radius: 8px;
-        }
-        .stat-item { text-align: center; }
-        .stat-label { font-size: 0.85em; color: #666; }
-        .stat-value { font-size: 1.4em; font-weight: bold; color: #333; }
+        .player-info { text-align:center; flex:1; }
+        .player-name { font-weight:bold; font-size:1em; color:#333; }
+        .player-hand-count { color:#666; font-size:0.85em; margin-top:4px; }
+        .vs-text { color:#999; margin:0 8px; }
 
         .trump-bar {
-            display: flex; align-items: center; gap: 8px;
-            background: #fffbeb; border: 1px solid #f6ad55;
-            border-radius: 8px; padding: 8px 12px;
-            margin-bottom: 12px; font-size: 0.9em; color: #744210;
+            display:flex; align-items:center; gap:10px;
+            background:#fffbeb; border:1px solid #f6ad55;
+            border-radius:8px; padding:8px 12px; margin-bottom:12px;
+            font-size:0.9em; color:#744210; font-weight:bold;
         }
-        .trump-bar-img {
-            width: 28px; height: 42px; border-radius: 4px;
-            overflow: hidden; border: 1px solid #f6ad55;
+        .trump-thumb {
+            width:30px; height:45px; border-radius:5px;
+            overflow:hidden; border:1px solid #f6ad55; flex-shrink:0;
         }
-        .trump-bar-img img { width: 200%; height: 100%; object-fit: cover; margin-left: 0; }
+        .trump-thumb canvas { width:100%; height:100%; display:block; }
 
         .table-area {
-            background: #2d5016; border-radius: 15px; padding: 15px;
-            min-height: 160px; margin-bottom: 15px;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center; gap: 10px;
+            background:#2d5016; border-radius:15px; padding:15px;
+            min-height:150px; margin-bottom:12px;
+            display:flex; flex-direction:column;
+            justify-content:center; align-items:center; gap:10px;
         }
-        .table-cards {
-            display: flex; flex-wrap: wrap; gap: 8px;
-            justify-content: center; min-height: 70px; align-items: center;
-        }
-        .card-on-table {
-            height: 90px; border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            border: 2px solid white;
-        }
-        .card-on-table.trump { border-color: #f6ad55; box-shadow: 0 0 10px rgba(246,173,85,0.6); }
-
         .game-status {
-            color: white; font-weight: bold; font-size: 1em;
-            background: rgba(255,255,255,0.15); padding: 6px 16px;
-            border-radius: 20px;
+            color:white; font-weight:bold;
+            background:rgba(255,255,255,0.15); padding:5px 16px; border-radius:20px;
+            font-size:0.95em;
         }
+        .table-cards { display:flex; gap:8px; justify-content:center; min-height:70px; align-items:center; }
+        .card-on-table { height:90px; border-radius:8px; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+        .card-on-table.trump { border-color:#f6ad55; box-shadow:0 0 10px rgba(246,173,85,0.7); }
 
-        .opponent-cards {
-            display: flex; flex-wrap: wrap; gap: 6px;
-            justify-content: center; margin-bottom: 15px;
-        }
+        .opponent-cards { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px; }
         .card-back {
-            width: 50px; height: 75px; border-radius: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: 2px solid white; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 1.2em;
+            width:46px; height:70px; border-radius:8px;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            border:2px solid white; display:flex;
+            align-items:center; justify-content:center; font-size:1.1em;
         }
 
-        .my-cards { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px; }
+        .my-cards { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:12px; min-height:80px; }
         .card-in-hand {
-            height: 90px; border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            border: 2px solid transparent;
+            height:90px; border-radius:8px; cursor:pointer;
+            border:2px solid transparent; transition:transform 0.15s, box-shadow 0.15s;
+            box-shadow:0 2px 6px rgba(0,0,0,0.2);
         }
-        .card-in-hand:active { transform: scale(0.95); }
-        .card-in-hand.selected { transform: translateY(-12px); border-color: #667eea; box-shadow: 0 6px 20px rgba(102,126,234,0.5); }
-        .card-in-hand.trump { border-color: #f6ad55; }
-        .card-in-hand.trump.selected { border-color: #ed8936; box-shadow: 0 6px 20px rgba(246,173,85,0.6); }
+        .card-in-hand:active { transform:scale(0.95); }
+        .card-in-hand.selected { transform:translateY(-12px); border-color:#667eea; box-shadow:0 6px 18px rgba(102,126,234,0.5); }
+        .card-in-hand.trump { border-color:#f6ad55; }
+        .card-in-hand.trump.selected { border-color:#ed8936; box-shadow:0 6px 18px rgba(246,173,85,0.6); }
 
-        .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .action-buttons { display:flex; gap:10px; }
+        .error-msg { color:#f56565; text-align:center; font-weight:bold; min-height:22px; margin:8px 0; }
 
         /* RESULT */
-        .result-section { text-align: center; padding: 20px 0; }
-        .result-winner { font-size: 2.5em; margin-bottom: 15px; }
+        .result-winner { font-size:2.5em; text-align:center; margin:15px 0; }
         .result-scores {
-            display: flex; justify-content: space-around;
-            background: #f7fafc; padding: 20px; border-radius: 12px; margin: 20px 0;
+            display:flex; justify-content:space-around;
+            background:#f7fafc; padding:20px; border-radius:12px; margin:15px 0;
         }
-        .result-player { text-align: center; }
-        .result-player-name { font-weight: bold; color: #333; margin-bottom: 8px; }
-        .result-player-wins { font-size: 2em; font-weight: bold; color: #667eea; }
-
-        .error-msg { color: #f56565; text-align: center; font-weight: bold; margin: 10px 0; min-height: 24px; }
-        .info-msg { color: #667eea; text-align: center; margin: 10px 0; }
+        .result-player { text-align:center; }
+        .result-player-name { font-weight:bold; color:#333; margin-bottom:6px; }
+        .result-player-wins { font-size:2em; font-weight:bold; color:#667eea; }
     </style>
 </head>
 <body>
 <div class="container">
 
-    <!-- МЕНЮ -->
-    <div class="screen active" id="screen-menu">
-        <h1>🦉 Сова Мудрості</h1>
-        <div class="menu-buttons">
-            <button class="btn-primary" onclick="goToSetup()">🎮 Створити гру</button>
-            <button class="btn-secondary" onclick="showScreen('screen-join')">🚪 Приєднатися</button>
-        </div>
+<!-- МЕНЮ -->
+<div class="screen active" id="screen-menu">
+    <h1>🦉 Сова Мудрості</h1>
+    <div class="menu-buttons">
+        <button class="btn-primary" onclick="showScreen('screen-setup')">🎮 Створити гру</button>
+        <button class="btn-secondary" onclick="showScreen('screen-join')">🚪 Приєднатися</button>
     </div>
-
-    <!-- НАЛАШТУВАННЯ (хост) -->
-    <div class="screen" id="screen-setup">
-        <h2>⚙️ Налаштування гри</h2>
-        <div class="nickname-form">
-            <div class="form-group">
-                <label>Твій нікнейм:</label>
-                <input type="text" id="host-nick" placeholder="Введи нікнейм" maxlength="16" />
-            </div>
-
-            <div class="form-group">
-                <label>Завантаж рівно 5 картинок одразу:</label>
-                <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-                    <div class="upload-icon">📁</div>
-                    <div class="upload-text">Натисни щоб вибрати фото</div>
-                    <div class="upload-sub">Вибери всі 5 фото одразу (Ctrl+A або Shift+клік)</div>
-                </div>
-                <input type="file" id="file-input" accept="image/*" multiple onchange="onFilesSelected()" />
-            </div>
-
-            <div class="images-preview" id="images-preview">
-                <div class="preview-slot">📷<div class="slot-num">1</div></div>
-                <div class="preview-slot">📷<div class="slot-num">2</div></div>
-                <div class="preview-slot">📷<div class="slot-num">3</div></div>
-                <div class="preview-slot">📷<div class="slot-num">4</div></div>
-                <div class="preview-slot">📷<div class="slot-num">5</div></div>
-            </div>
-
-            <div class="trump-select" id="trump-select" style="display:none">
-                <label>⭐ Вибери козиря:</label>
-                <div class="trump-btns" id="trump-btns"></div>
-            </div>
-
-            <div class="error-msg" id="setup-error"></div>
-            <button class="btn-primary" id="btn-start-create" onclick="createGame()" disabled>🚀 Створити гру</button>
-            <button class="btn-danger" onclick="showScreen('screen-menu')">← Назад</button>
-        </div>
-    </div>
-
-    <!-- ПРИЄДНАТИСЯ -->
-    <div class="screen" id="screen-join">
-        <h2>🚪 Приєднатися</h2>
-        <div class="nickname-form">
-            <div class="form-group">
-                <label>Твій нікнейм:</label>
-                <input type="text" id="guest-nick" placeholder="Введи нікнейм" maxlength="16" />
-            </div>
-            <div class="form-group">
-                <label>Код гри:</label>
-                <input type="text" id="join-code" placeholder="6 символів" maxlength="6" style="text-transform:uppercase;letter-spacing:4px;font-size:1.3em;text-align:center" />
-            </div>
-            <div class="error-msg" id="join-error"></div>
-            <button class="btn-secondary" onclick="joinGame()">🚪 Приєднатися</button>
-            <button class="btn-danger" onclick="showScreen('screen-menu')">← Назад</button>
-        </div>
-    </div>
-
-    <!-- ОЧІКУВАННЯ -->
-    <div class="screen" id="screen-waiting">
-        <h2>⏳ Очікування гравця...</h2>
-        <div class="link-section">
-            <p class="waiting-text">Поділися кодом з другом:</p>
-            <div class="link-box" id="game-code-display">------</div>
-            <button class="btn-copy" onclick="copyCode()">📋 Копіювати код</button>
-            <div class="copy-success" id="copy-success"></div>
-        </div>
-        <div style="text-align:center"><div class="loader"></div></div>
-        <p class="info-msg">Очікую підключення...</p>
-        <button class="btn-danger" onclick="cancelGame()">❌ Скасувати</button>
-    </div>
-
-    <!-- ГРА -->
-    <div class="screen" id="screen-game">
-        <div class="game-header">
-            <div class="player-info">
-                <div class="player-name" id="player1Name">Гравець 1</div>
-                <div class="player-hand-count" id="player1Hand">5 карт</div>
-            </div>
-            <div class="vs-text">⚔️</div>
-            <div class="player-info">
-                <div class="player-name" id="player2Name">Гравець 2</div>
-                <div class="player-hand-count" id="player2Hand">5 карт</div>
-            </div>
-        </div>
-
-        <div class="trump-bar">
-            <div class="trump-bar-img"><img id="trump-bar-img" src="" /></div>
-            <span>⭐ Козир</span>
-        </div>
-
-        <div class="table-area">
-            <div class="game-status" id="gameStatus">...</div>
-            <div class="table-cards" id="tableCards"></div>
-        </div>
-
-        <div class="opponent-cards" id="opponentCards"></div>
-
-        <div class="my-cards" id="myCards"></div>
-
-        <div class="action-buttons" id="action-buttons">
-            <button class="btn-primary btn-action" id="btn-play" onclick="playCard()">⚔️ Ходити</button>
-            <button class="btn-secondary btn-action" id="btn-beat" onclick="beatCard()" style="display:none">🛡️ Відбити</button>
-            <button class="btn-danger btn-action" id="btn-take" onclick="takeCards()" style="display:none">☝️ Взяти</button>
-        </div>
-    </div>
-
-    <!-- РЕЗУЛЬТАТ -->
-    <div class="screen" id="screen-result">
-        <div class="result-section">
-            <div class="result-winner" id="resultWinner">🎉 Ви виграли!</div>
-            <div class="result-scores">
-                <div class="result-player">
-                    <div class="result-player-name" id="resultPlayer1">Гравець 1</div>
-                    <div class="result-player-wins" id="resultWins1">0</div>
-                    <div style="color:#999;font-size:0.8em">перемог</div>
-                </div>
-                <div class="result-player">
-                    <div class="result-player-name" id="resultPlayer2">Гравець 2</div>
-                    <div class="result-player-wins" id="resultWins2">0</div>
-                    <div style="color:#999;font-size:0.8em">перемог</div>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="location.reload()">🔄 Нова гра</button>
-        </div>
-    </div>
-
 </div>
 
+<!-- НАЛАШТУВАННЯ -->
+<div class="screen" id="screen-setup">
+    <h2>⚙️ Налаштування</h2>
+    <div class="form-group">
+        <label>Твій нікнейм:</label>
+        <input type="text" id="host-nick" placeholder="Введи нікнейм" maxlength="16" />
+    </div>
+    <div class="form-group">
+        <label>Завантаж рівно 5 фото одразу:</label>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Натисни щоб вибрати фото</div>
+            <div class="upload-sub">Вибери всі 5 одразу (Ctrl+A або Shift+клік)</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" multiple onchange="onFilesSelected()" />
+    </div>
+    <div class="images-preview" id="images-preview">
+        <div class="preview-slot">📷<div class="slot-num">1</div></div>
+        <div class="preview-slot">📷<div class="slot-num">2</div></div>
+        <div class="preview-slot">📷<div class="slot-num">3</div></div>
+        <div class="preview-slot">📷<div class="slot-num">4</div></div>
+        <div class="preview-slot">📷<div class="slot-num">5</div></div>
+    </div>
+    <div id="trump-select" style="display:none; margin-bottom:12px;">
+        <label style="font-weight:bold; color:#333;">⭐ Вибери козиря:</label>
+        <div class="trump-btns" id="trump-btns"></div>
+    </div>
+    <div class="error-msg" id="setup-error"></div>
+    <button class="btn-primary" id="btn-create" onclick="createGame()" disabled>🚀 Створити гру</button>
+    <br><br>
+    <button class="btn-danger" onclick="showScreen('screen-menu')">← Назад</button>
+</div>
+
+<!-- ПРИЄДНАТИСЯ -->
+<div class="screen" id="screen-join">
+    <h2>🚪 Приєднатися</h2>
+    <div class="form-group">
+        <label>Твій нікнейм:</label>
+        <input type="text" id="guest-nick" placeholder="Введи нікнейм" maxlength="16" />
+    </div>
+    <div class="form-group">
+        <label>Код гри:</label>
+        <input type="text" id="join-code" placeholder="6 символів" maxlength="6"
+               style="text-transform:uppercase;letter-spacing:4px;font-size:1.3em;text-align:center;" />
+    </div>
+    <div class="error-msg" id="join-error"></div>
+    <button class="btn-secondary" onclick="joinGame()">🚪 Приєднатися</button>
+    <br><br>
+    <button class="btn-danger" onclick="showScreen('screen-menu')">← Назад</button>
+</div>
+
+<!-- ОЧІКУВАННЯ -->
+<div class="screen" id="screen-waiting">
+    <h2>⏳ Очікування...</h2>
+    <p style="text-align:center;color:#666;">Поділися кодом з другом:</p>
+    <div class="link-box" id="game-code-display">------</div>
+    <button class="btn-primary" onclick="copyCode()">📋 Копіювати код</button>
+    <div class="copy-success" id="copy-success"></div>
+    <span class="loader"></span>
+    <button class="btn-danger" style="margin-top:10px;" onclick="cancelGame()">❌ Скасувати</button>
+</div>
+
+<!-- ГРА -->
+<div class="screen" id="screen-game">
+    <div class="game-header">
+        <div class="player-info">
+            <div class="player-name" id="player1Name">Гравець 1</div>
+            <div class="player-hand-count" id="player1Hand">5 карт</div>
+        </div>
+        <div class="vs-text">⚔️</div>
+        <div class="player-info">
+            <div class="player-name" id="player2Name">Гравець 2</div>
+            <div class="player-hand-count" id="player2Hand">5 карт</div>
+        </div>
+    </div>
+
+    <div class="trump-bar">
+        <div class="trump-thumb"><canvas id="trump-canvas" width="30" height="45"></canvas></div>
+        ⭐ Козир
+    </div>
+
+    <div class="table-area">
+        <div class="game-status" id="gameStatus">...</div>
+        <div class="table-cards" id="tableCards"></div>
+    </div>
+
+    <div class="opponent-cards" id="opponentCards"></div>
+    <div class="my-cards" id="myCards"></div>
+
+    <div class="action-buttons">
+        <button class="btn-primary btn-action" id="btn-play" onclick="playCard()">⚔️ Ходити</button>
+        <button class="btn-secondary btn-action" id="btn-beat" onclick="beatCard()" style="display:none">🛡️ Відбити</button>
+        <button class="btn-danger btn-action" id="btn-take" onclick="takeCards()" style="display:none">☝️ Взяти</button>
+    </div>
+</div>
+
+<!-- РЕЗУЛЬТАТ -->
+<div class="screen" id="screen-result">
+    <div class="result-winner" id="resultWinner">🎉</div>
+    <div class="result-scores">
+        <div class="result-player">
+            <div class="result-player-name" id="resultPlayer1">-</div>
+            <div class="result-player-wins" id="resultWins1">0</div>
+            <div style="color:#999;font-size:0.8em">перемог</div>
+        </div>
+        <div class="result-player">
+            <div class="result-player-name" id="resultPlayer2">-</div>
+            <div class="result-player-wins" id="resultWins2">0</div>
+            <div style="color:#999;font-size:0.8em">перемог</div>
+        </div>
+    </div>
+    <button class="btn-primary" onclick="location.reload()">🔄 Нова гра</button>
+</div>
+
+</div><!-- /container -->
+
 <script>
-// ======= ЗАМІНИ НА СВОЄ NGROK ПОСИЛАННЯ =======
+// ======= ЗАМІНИ НА СВОЄ NGROK =======
 const SERVER_URL = 'wss://tranquil-houston-aforethought.ngrok-free.dev';
 
 // ======= STATE =======
 let ws = null;
-let myRole = null;       // 'host' або 'guest'
-let myNick = '';
-let opNick = '';
+let myRole = null;
+let myNick = '', opNick = '';
 let myHand = [];
 let opponentHandCount = 0;
-let phase = 'idle';      // idle / attack / defend / wait
+let phase = 'idle';
 let selectedCardIdx = null;
-let trumpImg = -1;
+let trumpImg = 0;
 let fieldCard = null;
-let CARD_IMAGES = [];
-let myWins = 0;
-let opWins = 0;
+let myWins = 0, opWins = 0;
+
+// Зберігаємо завантажені Image об'єкти
+let loadedImages = [];   // loadedImages[i] = HTMLImageElement (вже завантажений)
+let CARD_IMAGES_B64 = []; // base64 рядки
 
 // ======= SETUP =======
-function goToSetup() {
-    showScreen('screen-setup');
-}
-
 function onFilesSelected() {
     const files = Array.from(document.getElementById('file-input').files);
     const err = document.getElementById('setup-error');
-
     if (files.length !== 5) {
         err.textContent = `❌ Потрібно рівно 5 фото! Ти вибрав ${files.length}.`;
         return;
     }
     err.textContent = '';
-
-    CARD_IMAGES = [];
-    let loaded = 0;
+    CARD_IMAGES_B64 = new Array(5);
+    loadedImages = new Array(5);
+    let done = 0;
 
     files.forEach((file, idx) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-            CARD_IMAGES[idx] = e.target.result;
-            loaded++;
+            const b64 = e.target.result;
+            CARD_IMAGES_B64[idx] = b64;
 
-            // Оновити превью
-            const preview = document.getElementById('images-preview');
-            const slots = preview.querySelectorAll('.preview-slot');
-            slots[idx].innerHTML = `<img src="${e.target.result}" /><div class="slot-num">${idx+1}</div>`;
+            // Завантажуємо Image об'єкт одразу
+            const img = new Image();
+            img.onload = () => {
+                loadedImages[idx] = img;
+                done++;
 
-            if (loaded === 5) {
-                // Показати вибір козиря
-                document.getElementById('trump-select').style.display = 'block';
-                const btns = document.getElementById('trump-btns');
-                btns.innerHTML = '';
-                for (let i = 0; i < 5; i++) {
-                    const b = document.createElement('button');
-                    b.textContent = `Картинка ${i+1}`;
-                    b.className = 'trump-btn' + (i === 0 ? ' active' : '');
-                    b.onclick = () => selectTrump(i);
-                    btns.appendChild(b);
-                }
-                trumpImg = 0;
-                document.getElementById('images-preview').querySelectorAll('.preview-slot')[0].classList.add('is-trump');
+                // Оновити превью
+                const slots = document.querySelectorAll('.preview-slot');
+                slots[idx].innerHTML = `<img src="${b64}"><div class="slot-num">${idx+1}</div>`;
 
-                document.getElementById('upload-zone').classList.add('has-files');
-                document.getElementById('upload-zone').querySelector('.upload-text').textContent = '✅ 5 фото завантажено!';
-                document.getElementById('btn-start-create').disabled = false;
-            }
+                if (done === 5) allImagesReady();
+            };
+            img.src = b64;
         };
         reader.readAsDataURL(file);
     });
 }
 
+function allImagesReady() {
+    // Показати кнопки козиря
+    document.getElementById('trump-select').style.display = 'block';
+    const btns = document.getElementById('trump-btns');
+    btns.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        const b = document.createElement('button');
+        b.textContent = `Картинка ${i+1}`;
+        b.className = 'trump-btn' + (i === 0 ? ' active' : '');
+        b.onclick = () => selectTrump(i);
+        btns.appendChild(b);
+    }
+    selectTrump(0);
+
+    const uz = document.getElementById('upload-zone');
+    uz.classList.add('done');
+    uz.querySelector('.upload-text').textContent = '✅ 5 фото завантажено!';
+    document.getElementById('btn-create').disabled = false;
+}
+
 function selectTrump(idx) {
     trumpImg = idx;
     document.querySelectorAll('.trump-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
-    document.querySelectorAll('.preview-slot').forEach((s, i) => s.classList.toggle('is-trump', i === idx));
+    document.querySelectorAll('.preview-slot').forEach((s, i) => s.classList.toggle('trump', i === idx));
+}
+
+// ======= МАЛЮВАННЯ ПОЛОВИНИ КАРТИ =======
+// Повертає canvas element з половиною картинки
+function makeCardCanvas(imgIdx, half, w, h) {
+    const img = loadedImages[imgIdx];
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    if (!img) return canvas;
+    const ctx = canvas.getContext('2d');
+    const sx = half === 0 ? 0 : img.naturalWidth / 2;
+    ctx.drawImage(img, sx, 0, img.naturalWidth / 2, img.naturalHeight, 0, 0, w, h);
+    return canvas;
+}
+
+function cardToDataURL(imgIdx, half) {
+    return makeCardCanvas(imgIdx, half, 60, 90).toDataURL();
 }
 
 // ======= WEBSOCKET =======
@@ -455,57 +408,63 @@ function connect(cb) {
     ws = new WebSocket(SERVER_URL);
     ws.onopen = cb;
     ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
-    ws.onerror = () => alert('❌ Помилка підключення до сервера!');
+    ws.onerror = () => alert('❌ Помилка підключення!');
     ws.onclose = () => {
         if (document.getElementById('screen-game').classList.contains('active')) {
-            showScreen('screen-result');
             document.getElementById('resultWinner').textContent = '💔 Суперник відключився';
+            showScreen('screen-result');
         }
     };
 }
 
-function sendWS(data) {
-    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data));
+function sendWS(d) {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(d));
 }
 
-// ======= ACTIONS =======
+// ======= GAME ACTIONS =======
 function createGame() {
     myNick = document.getElementById('host-nick').value.trim() || 'Гравець 1';
-    if (CARD_IMAGES.length !== 5) { document.getElementById('setup-error').textContent = 'Завантаж 5 фото!'; return; }
-    connect(() => sendWS({ type: 'create-game', nickname: myNick, images: CARD_IMAGES, trumpImg }));
+    connect(() => sendWS({ type: 'create-game', nickname: myNick, images: CARD_IMAGES_B64, trumpImg }));
 }
 
 function joinGame() {
     myNick = document.getElementById('guest-nick').value.trim() || 'Гравець 2';
     const code = document.getElementById('join-code').value.trim().toUpperCase();
-    if (!code) { document.getElementById('join-error').textContent = 'Введи код гри!'; return; }
+    if (!code) { document.getElementById('join-error').textContent = 'Введи код!'; return; }
     connect(() => sendWS({ type: 'join-game', gameId: code, nickname: myNick }));
 }
 
 function copyCode() {
-    const code = document.getElementById('game-code-display').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        document.getElementById('copy-success').textContent = '✅ Скопійовано!';
-        setTimeout(() => document.getElementById('copy-success').textContent = '', 2000);
-    });
+    navigator.clipboard.writeText(document.getElementById('game-code-display').textContent)
+        .then(() => {
+            document.getElementById('copy-success').textContent = '✅ Скопійовано!';
+            setTimeout(() => document.getElementById('copy-success').textContent = '', 2000);
+        });
 }
 
-function cancelGame() {
-    if (ws) ws.close();
-    showScreen('screen-menu');
+function cancelGame() { if (ws) ws.close(); showScreen('screen-menu'); }
+
+function selectCard(idx) {
+    if (phase !== 'attack' && phase !== 'defend') return;
+    selectedCardIdx = selectedCardIdx === idx ? null : idx;
+    renderMyCards();
 }
 
 function playCard() {
     if (selectedCardIdx === null) { alert('Вибери карту!'); return; }
     const card = myHand[selectedCardIdx];
-    if (card.isTrump && myHand.length === 1) { alert('❌ Козирем не можна ходити останньою картою!'); return; }
+    if (card.img === trumpImg && myHand.length === 1) {
+        alert('❌ Козирем не можна ходити останньою картою!'); return;
+    }
     sendWS({ type: 'attack', card: { img: card.img, half: card.half } });
 }
 
 function beatCard() {
-    if (selectedCardIdx === null) { alert('Вибери карту для відбиття!'); return; }
+    if (selectedCardIdx === null) { alert('Вибери карту!'); return; }
     const card = myHand[selectedCardIdx];
-    if (card.isTrump && myHand.length === 1) { alert('❌ Козирем не можна відбивати останньою картою!'); return; }
+    if (card.img === trumpImg && myHand.length === 1) {
+        alert('❌ Козирем не можна відбивати останньою картою!'); return;
+    }
     sendWS({ type: 'defend', card: { img: card.img, half: card.half } });
 }
 
@@ -514,15 +473,9 @@ function takeCards() {
     sendWS({ type: 'take-cards' });
 }
 
-function selectCard(idx) {
-    if (phase !== 'attack' && phase !== 'defend') return;
-    selectedCardIdx = selectedCardIdx === idx ? null : idx;
-    renderMyCards();
-}
-
-// ======= MESSAGE HANDLER =======
+// ======= MESSAGES =======
 function handleMessage(data) {
-    switch(data.type) {
+    switch (data.type) {
         case 'game-created':
             document.getElementById('game-code-display').textContent = data.gameId;
             showScreen('screen-waiting');
@@ -535,25 +488,31 @@ function handleMessage(data) {
 
         case 'joined':
             opNick = data.hostNick;
-            CARD_IMAGES = data.images;
+            // Завантажуємо картинки від хоста
+            CARD_IMAGES_B64 = data.images;
             trumpImg = data.trumpImg;
+            loadedImages = new Array(5);
+            let loaded = 0;
+            data.images.forEach((b64, idx) => {
+                const img = new Image();
+                img.onload = () => { loadedImages[idx] = img; loaded++; };
+                img.src = b64;
+            });
             break;
 
         case 'game-start':
             myRole = data.role;
             trumpImg = data.trumpImg;
-            CARD_IMAGES = data.images;
-            myHand = data.hand.map(c => ({ ...c, isTrump: c.img === trumpImg }));
-            opponentHandCount = 5;
-            fieldCard = null;
-            selectedCardIdx = null;
-            phase = data.attacker === myRole ? 'attack' : 'wait';
-            setupGameUI();
-            showScreen('screen-game');
+            // Якщо гість — картинки вже завантажуються, чекаємо
+            if (myRole === 'guest') {
+                waitImagesAndStart(data);
+            } else {
+                startGameUI(data);
+            }
             break;
 
         case 'attack-sent':
-            myHand = data.hand.map(c => ({ ...c, isTrump: c.img === trumpImg }));
+            myHand = data.hand;
             fieldCard = data.card;
             phase = 'wait';
             renderAll();
@@ -567,7 +526,7 @@ function handleMessage(data) {
             break;
 
         case 'defend-success':
-            myHand = data.hand.map(c => ({ ...c, isTrump: c.img === trumpImg }));
+            myHand = data.hand;
             fieldCard = null;
             selectedCardIdx = null;
             phase = data.attacker === myRole ? 'attack' : 'wait';
@@ -575,7 +534,7 @@ function handleMessage(data) {
             break;
 
         case 'took-cards':
-            myHand = data.hand.map(c => ({ ...c, isTrump: c.img === trumpImg }));
+            myHand = data.hand;
             fieldCard = null;
             selectedCardIdx = null;
             phase = 'wait';
@@ -601,26 +560,48 @@ function handleMessage(data) {
         case 'game-over':
             const iWon = data.winner === myRole;
             if (iWon) myWins++; else opWins++;
-            showResult(iWon, data.winnerNick);
+            showResult(iWon);
             break;
 
         case 'opponent-left':
-            showResult(true, myNick);
+            showResult(true);
             break;
     }
 }
 
-// ======= RENDER =======
-function setupGameUI() {
+function waitImagesAndStart(data) {
+    // Чекаємо поки всі 5 картинок завантажаться
+    const check = setInterval(() => {
+        if (loadedImages.filter(Boolean).length === 5) {
+            clearInterval(check);
+            startGameUI(data);
+        }
+    }, 100);
+}
+
+function startGameUI(data) {
+    myHand = data.hand;
+    opponentHandCount = 5;
+    fieldCard = null;
+    selectedCardIdx = null;
+    phase = data.attacker === myRole ? 'attack' : 'wait';
+
     document.getElementById('player1Name').textContent = myNick;
     document.getElementById('player2Name').textContent = opNick;
 
-    // trump preview
-    const img = document.getElementById('trump-bar-img');
-    img.src = CARD_IMAGES[trumpImg];
-    img.style.marginLeft = '0';
+    // Козир превью
+    const trumpCanvas = document.getElementById('trump-canvas');
+    const tCtx = trumpCanvas.getContext('2d');
+    const tImg = loadedImages[trumpImg];
+    if (tImg) {
+        tCtx.drawImage(tImg, 0, 0, tImg.naturalWidth / 2, tImg.naturalHeight, 0, 0, 30, 45);
+    }
+
+    renderAll();
+    showScreen('screen-game');
 }
 
+// ======= RENDER =======
 function renderAll() {
     renderMyCards();
     renderOpponentCards();
@@ -632,88 +613,57 @@ function renderAll() {
 function renderMyCards() {
     const div = document.getElementById('myCards');
     div.innerHTML = '';
+    document.getElementById('player1Hand').textContent = `${myHand.length} карт`;
+
     myHand.forEach((card, idx) => {
+        const isTrump = card.img === trumpImg;
+        const isSelected = selectedCardIdx === idx;
+
         const img = document.createElement('img');
-        img.src = getCardImage(card);
-        img.className = 'card-in-hand' + (card.isTrump ? ' trump' : '') + (selectedCardIdx === idx ? ' selected' : '');
+        img.src = cardToDataURL(card.img, card.half);
+        img.className = 'card-in-hand' + (isTrump ? ' trump' : '') + (isSelected ? ' selected' : '');
         img.onclick = () => selectCard(idx);
         div.appendChild(img);
     });
-    document.getElementById('player1Hand').textContent = `${myHand.length} карт`;
 }
 
 function renderOpponentCards() {
     const div = document.getElementById('opponentCards');
     div.innerHTML = '';
+    document.getElementById('player2Hand').textContent = `${opponentHandCount} карт`;
     for (let i = 0; i < opponentHandCount; i++) {
         const d = document.createElement('div');
         d.className = 'card-back';
         d.textContent = '🦉';
         div.appendChild(d);
     }
-    document.getElementById('player2Hand').textContent = `${opponentHandCount} карт`;
 }
 
 function renderTable() {
     const div = document.getElementById('tableCards');
     div.innerHTML = '';
     if (!fieldCard) return;
+    const isTrump = fieldCard.img === trumpImg;
     const img = document.createElement('img');
-    img.src = getCardImage(fieldCard);
-    img.className = 'card-on-table' + (fieldCard.img === trumpImg ? ' trump' : '');
+    img.src = cardToDataURL(fieldCard.img, fieldCard.half);
+    img.className = 'card-on-table' + (isTrump ? ' trump' : '');
     div.appendChild(img);
 }
 
 function renderStatus() {
     const s = document.getElementById('gameStatus');
-    if (phase === 'attack') s.textContent = '⚔️ Ваш хід';
-    else if (phase === 'defend') s.textContent = '🛡️ Відбийте або візьміть';
+    if (phase === 'attack') s.textContent = '⚔️ Ваш хід — вибери карту';
+    else if (phase === 'defend') s.textContent = '🛡️ Відбий або візьми карти';
     else s.textContent = '⏳ Хід суперника...';
 }
 
 function renderButtons() {
-    const btnPlay = document.getElementById('btn-play');
-    const btnBeat = document.getElementById('btn-beat');
-    const btnTake = document.getElementById('btn-take');
-
-    if (phase === 'attack') {
-        btnPlay.style.display = 'block';
-        btnBeat.style.display = 'none';
-        btnTake.style.display = 'none';
-    } else if (phase === 'defend') {
-        btnPlay.style.display = 'none';
-        btnBeat.style.display = 'block';
-        btnTake.style.display = 'block';
-    } else {
-        btnPlay.style.display = 'none';
-        btnBeat.style.display = 'none';
-        btnTake.style.display = 'none';
-    }
+    document.getElementById('btn-play').style.display = phase === 'attack' ? 'block' : 'none';
+    document.getElementById('btn-beat').style.display = phase === 'defend' ? 'block' : 'none';
+    document.getElementById('btn-take').style.display = phase === 'defend' ? 'block' : 'none';
 }
 
-function getCardImage(card) {
-    // Малюємо половину картинки через canvas
-    const src = CARD_IMAGES[card.img];
-    const half = card.half; // 0=left, 1=right
-    const canvas = document.createElement('canvas');
-    const img = new Image();
-    img.src = src;
-
-    // Повертаємо data URL синхронно якщо вже завантажено
-    if (img.complete && img.naturalWidth > 0) {
-        canvas.width = img.naturalWidth / 2;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        const sx = half === 0 ? 0 : img.naturalWidth / 2;
-        ctx.drawImage(img, sx, 0, img.naturalWidth / 2, img.naturalHeight, 0, 0, canvas.width, canvas.height);
-        return canvas.toDataURL();
-    }
-    // Якщо ще не завантажено — повернути заглушку і перемалювати потім
-    img.onload = () => renderAll();
-    return src; // тимчасово повна картинка
-}
-
-function showResult(iWon, winnerNick) {
+function showResult(iWon) {
     document.getElementById('resultWinner').textContent = iWon ? '🎉 Ви виграли!' : '😔 Ви програли';
     document.getElementById('resultPlayer1').textContent = myNick;
     document.getElementById('resultPlayer2').textContent = opNick;
