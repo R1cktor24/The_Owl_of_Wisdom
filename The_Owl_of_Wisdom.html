@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карткова гра</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.5em; }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: white;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+        }
+
+        .btn-danger {
+            background: #f56565;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            font-size: 1em;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .nickname-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .link-section {
+            text-align: center;
+        }
+
+        .link-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #2d3748;
+            border: 2px dashed #667eea;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-copy {
+            background: #4299e1;
+            margin-bottom: 15px;
+        }
+
+        .copy-success {
+            color: #48bb78;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .waiting-text {
+            color: #666;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .player-info {
+            text-align: center;
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .player-hand-count {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .vs-text {
+            color: #999;
+            margin: 0 10px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .table-area {
+            background: #2d5016;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 200px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .table-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 80px;
+        }
+
+        .card-on-table {
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            max-width: 80px;
+            max-height: 120px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid #333;
+        }
+
+        .card-on-table img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .card-on-table.trump {
+            border-color: #fbbf24;
+        }
+
+        .hand-area {
+            margin-bottom: 20px;
+        }
+
+        .hand-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .hand-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .card-in-hand {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 4px;
+            border-radius: 8px;
+            width: 70px;
+            height: 100px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-in-hand img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-in-hand.trump {
+            border-color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .card-in-hand.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card-in-hand:active {
+            transform: scale(0.95);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .game-status {
+            text-align: center;
+            padding: 15px;
+            background: #fef3c7;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        .game-status.waiting {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .game-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .result-container {
+            text-align: center;
+        }
+
+        .result-winner {
+            font-size: 2em;
+            color: #48bb78;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .result-stats {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .trump-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .trump-option {
+            cursor: pointer;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            transition: all 0.2s;
+            max-height: 120px;
+            overflow: hidden;
+        }
+
+        .trump-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .trump-option.selected {
+            border-color: #f59e0b;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+        }
+
+        .preview-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preview-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 150px;
+        }
+
+        .preview-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ЭКРАН 1: Меню -->
+        <div id="menu" class="screen active">
+            <h1>🎴 Карткова гра</h1>
+            <div class="menu-buttons">
+                <button class="btn-primary" onclick="startNewGame()">Створити гру</button>
+                <button class="btn-secondary" onclick="joinGame()">Приєднатися</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: Введення нікнейму -->
+        <div id="nickname" class="screen">
+            <h2>Привіт!</h2>
+            <div class="nickname-form">
+                <div class="form-group">
+                    <label>Введіть ваш нікнейм:</label>
+                    <input type="text" id="nicknameInput" placeholder="Ваше ім'я" maxlength="20">
+                </div>
+                <button class="btn-primary" onclick="confirmNickname()">Далі</button>
+                <button class="btn-danger" onclick="goToMenu()">Назад</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: Завантаження картинок (тільки для першого гравця) -->
+        <div id="upload" class="screen">
+            <h2>Завантажте картинки</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                Виберіть 5 картинок з галереї
+            </p>
+            <div class="form-group">
+                <label>Виберіть 5 картинок:</label>
+                <input type="file" id="imageInput" accept="image/*" multiple>
+            </div>
+            <div id="previewCards" class="preview-cards"></div>
+            <button class="btn-primary" onclick="proceedToTrumpSelection()" style="margin-bottom: 10px;">Далі</button>
+            <button class="btn-danger" onclick="goToMenu()">Відмінити</button>
+        </div>
+
+        <!-- ЭКРАН 4: Вибір козиря -->
+        <div id="trumpSelect" class="screen">
+            <h2>Виберіть козиря</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                Клікніть на картинку, яка буде козирем
+            </p>
+            <div id="trumpSelector" class="trump-selector"></div>
+            <button class="btn-primary" onclick="confirmTrump()" style="margin-bottom: 10px;">Почати гру</button>
+        </div>
+
+        <!-- ЭКРАН 5: Посилання для запрошення -->
+        <div id="waiting" class="screen">
+            <h2>Очікування гравця</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                Поділіться цим посиланням з другим гравцем:
+            </p>
+            <div class="link-section">
+                <button class="btn-copy" onclick="copyLink()">📋 Копіювати посилання</button>
+                <div class="link-box" id="linkBox">Генерую посилання...</div>
+                <div id="copySuccess" class="copy-success"></div>
+                <div class="waiting-text">
+                    Очікування підключення другого гравця...
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <button class="btn-danger" onclick="cancelGame()">Скасувати</button>
+        </div>
+
+        <!-- ЭКРАН 6: Гра -->
+        <div id="game" class="screen">
+            <div class="game-header">
+                <div class="player-info">
+                    <div class="player-name" id="player1Name">Гравець 1</div>
+                    <div class="player-hand-count" id="player1Hand">0 карт</div>
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="player-info">
+                    <div class="player-name" id="player2Name">Гравець 2</div>
+                    <div class="player-hand-count" id="player2Hand">0 карт</div>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-label">Мої перемоги</div>
+                    <div class="stat-value" id="myWins">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Раунди</div>
+                    <div class="stat-value" id="roundCount">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Його перемоги</div>
+                    <div class="stat-value" id="opponentWins">0</div>
+                </div>
+            </div>
+
+            <div class="game-status" id="gameStatus">Чекаємо на ходу...</div>
+
+            <div class="table-area">
+                <div style="color: white; text-align: center; font-size: 0.9em;">Стіл</div>
+                <div id="tableCards" class="table-cards"></div>
+            </div>
+
+            <div class="hand-area">
+                <div class="hand-label">В��ші карти:</div>
+                <div id="myCards" class="hand-cards"></div>
+            </div>
+
+            <div class="actions">
+                <button class="btn-action btn-primary" onclick="playCard()">Кинути</button>
+                <button class="btn-action btn-secondary" onclick="beatCard()">Бити</button>
+                <button class="btn-action btn-danger" onclick="takeCards()">Брати</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 7: Результат раунду -->
+        <div id="result" class="screen">
+            <div class="result-container">
+                <h2>Раунд завершен!</h2>
+                <div class="result-winner" id="resultWinner">Перемога!</div>
+                <div class="result-stats">
+                    <div class="stat-row">
+                        <span class="stat-name" id="resultPlayer1">Гравець 1:</span>
+                        <span class="stat-number" id="resultPlayer1Stats">5 карт</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-name" id="resultPlayer2">Гравець 2:</span>
+                        <span class="stat-number" id="resultPlayer2Stats">0 карт</span>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="nextRound()">Наступний раунд</button>
+                <button class="btn-danger" onclick="goToMenu()">Вийти</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== ГЛОБАЛЬНІ ЗМІННІ =====
+        let gameState = {
+            isHost: false,
+            myNickname: '',
+            opponentNickname: '',
+            myImages: [],
+            trumpIndex: -1,
+            deck: [],
+            myHand: [],
+            opponentHandCount: 0,
+            tableCards: [],
+            myWins: 0,
+            opponentWins: 0,
+            round: 1,
+            currentPlayer: 'host',
+            gameActive: false,
+            selectedCard: null,
+            sessionId: ''
+        };
+
+        const CARD_SCALE = 0.5;
+
+        // ===== УТИЛІТИ =====
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToMenu() {
+            gameState = {
+                isHost: false,
+                myNickname: '',
+                opponentNickname: '',
+                myImages: [],
+                trumpIndex: -1,
+                deck: [],
+                myHand: [],
+                opponentHandCount: 0,
+                tableCards: [],
+                myWins: 0,
+                opponentWins: 0,
+                round: 1,
+                currentPlayer: 'host',
+                gameActive: false,
+                selectedCard: null,
+                sessionId: ''
+            };
+            showScreen('menu');
+        }
+
+        function saveStat(key, value) {
+            localStorage.setItem(key, value);
+        }
+
+        function loadStat(key, defaultValue = 0) {
+            const val = localStorage.getItem(key);
+            return val ? parseInt(val) : defaultValue;
+        }
+
+        // ===== ЭКРАН 1: МЕНЮ =====
+        function startNewGame() {
+            gameState.isHost = true;
+            showScreen('nickname');
+        }
+
+        function joinGame() {
+            gameState.isHost = false;
+            showScreen('nickname');
+        }
+
+        // ===== ЭКРАН 2: НІКНЕЙМ =====
+        function confirmNickname() {
+            const input = document.getElementById('nicknameInput');
+            if (!input.value.trim()) {
+                alert('Будь ласка, введіть нікнейм');
+                return;
+            }
+
+            gameState.myNickname = input.value.trim();
+            saveStat('nickname', gameState.myNickname);
+
+            if (gameState.isHost) {
+                showScreen('upload');
+            } else {
+                showScreen('waiting');
+                initPeerAsGuest();
+            }
+        }
+
+        // ===== ЭКРАН 3: ЗАВАНТАЖЕННЯ КАРТИНОК =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('imageInput');
+            if (imageInput) {
+                imageInput.addEventListener('change', handleImageSelect);
+            }
+        });
+
+        function handleImageSelect(e) {
+            const files = Array.from(e.target.files);
+            
+            if (files.length !== 5) {
+                alert('Будь ласка, виберіть рівно 5 картинок');
+                return;
+            }
+
+            gameState.myImages = [];
+            let loadedCount = 0;
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    gameState.myImages[index] = event.target.result;
+                    loadedCount++;
+
+                    if (loadedCount === 5) {
+                        displayPreview();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayPreview() {
+            const preview = document.getElementById('previewCards');
+            preview.innerHTML = '';
+            
+            gameState.myImages.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'preview-card';
+                div.innerHTML = `<img src="${img}" alt="Card ${idx + 1}">`;
+                preview.appendChild(div);
+            });
+        }
+
+        function proceedToTrumpSelection() {
+            if (gameState.myImages.length !== 5) {
+                alert('Завантажте 5 картинок');
+                return;
+            }
+            showScreen('trumpSelect');
+            displayTrumpSelector();
+        }
+
+        function displayTrumpSelector() {
+            const selector = document.getElementById('trumpSelector');
+            selector.innerHTML = '';
+
+            gameState.myImages.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'trump-option';
+                div.innerHTML = `<img src="${img}" alt="Trump ${idx + 1}">`;
+                div.onclick = () => selectTrump(idx);
+                selector.appendChild(div);
+            });
+        }
+
+        function selectTrump(index) {
+            gameState.trumpIndex = index;
+            
+            document.querySelectorAll('.trump-option').forEach((el, idx) => {
+                el.classList.toggle('selected', idx === index);
+            });
+        }
+
+        function confirmTrump() {
+            if (gameState.trumpIndex === -1) {
+                alert('Виберіть козиря');
+                return;
+            }
+
+            showScreen('waiting');
+            initPeerAsHost();
+        }
+
+        // ===== WEBRTC ЛОГІКА =====
+        function initPeerAsHost() {
+            gameState.sessionId = generateSessionId();
+            const gameUrl = `${window.location.href.split('?')[0]}?session=${gameState.sessionId}`;
+            document.getElementById('linkBox').textContent = gameUrl;
+            
+            setupHostListener();
+        }
+
+        function initPeerAsGuest() {
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('session');
+
+            if (!sessionId) {
+                alert('Невірне посилання');
+                goToMenu();
+                return;
+            }
+
+            gameState.sessionId = sessionId;
+            setupGuestConnector();
+        }
+
+        function generateSessionId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function setupHostListener() {
+            const checkInterval = setInterval(() => {
+                const guestReady = localStorage.getItem(`guest_ready_${gameState.sessionId}`);
+                if (guestReady) {
+                    clearInterval(checkInterval);
+                    localStorage.removeItem(`guest_ready_${gameState.sessionId}`);
+                    gameState.opponentNickname = localStorage.getItem(`guest_nickname_${gameState.sessionId}`);
+                    initializeGame();
+                }
+            }, 500);
+
+            setTimeout(() => {
+                clearInterval(checkInterval);
+            }, 30000);
+        }
+
+        function setupGuestConnector() {
+            localStorage.setItem(`guest_nickname_${gameState.sessionId}`, gameState.myNickname);
+            localStorage.setItem(`guest_ready_${gameState.sessionId}`, 'true');
+
+            const checkInterval = setInterval(() => {
+                const gameData = localStorage.getItem(`game_data_${gameState.sessionId}`);
+                if (gameData) {
+                    clearInterval(checkInterval);
+                    const data = JSON.parse(gameData);
+                    gameState.myImages = data.images;
+                    gameState.trumpIndex = data.trumpIndex;
+                    gameState.opponentNickname = data.hostNickname;
+                    gameState.isHost = false;
+                    initializeGame();
+                }
+            }, 500);
+
+            setTimeout(() => {
+                clearInterval(checkInterval);
+            }, 30000);
+        }
+
+        function initializeGame() {
+            if (gameState.isHost) {
+                const gameData = {
+                    images: gameState.myImages,
+                    trumpIndex: gameState.trumpIndex,
+                    hostNickname: gameState.myNickname
+                };
+                localStorage.setItem(`game_data_${gameState.sessionId}`, JSON.stringify(gameData));
+            }
+
+            createDeck();
+            shuffleDeck();
+            dealCards();
+
+            updateGameUI();
+            showScreen('game');
+        }
+
+        // ===== ЛОГІКА ГИРИ =====
+        function createDeck() {
+            gameState.deck = [];
+            
+            gameState.myImages.forEach((img, imgIdx) => {
+                gameState.deck.push({
+                    imageIndex: imgIdx,
+                    half: 'left',
+                    isTrump: imgIdx === gameState.trumpIndex,
+                    canvas: null
+                });
+                
+                gameState.deck.push({
+                    imageIndex: imgIdx,
+                    half: 'right',
+                    isTrump: imgIdx === gameState.trumpIndex,
+                    canvas: null
+                });
+            });
+
+            gameState.deck.forEach(card => {
+                card.canvas = generateCardCanvas(card);
+            });
+        }
+
+        function generateCardCanvas(card) {
+            const img = new Image();
+            img.src = gameState.myImages[card.imageIndex];
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            img.onload = () => {
+                canvas.width = img.width * CARD_SCALE;
+                canvas.height = img.height * CARD_SCALE;
+
+                if (card.half === 'left') {
+                    ctx.drawImage(img, 0, 0, img.width / 2, img.height, 0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.drawImage(img, img.width / 2, 0, img.width / 2, img.height, 0, 0, canvas.width, canvas.height);
+                }
+            };
+
+            return canvas;
+        }
+
+        function shuffleDeck() {
+            for (let i = gameState.deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameState.deck[i], gameState.deck[j]] = [gameState.deck[j], gameState.deck[i]];
+            }
+        }
+
+        function dealCards() {
+            gameState.myHand = gameState.deck.splice(0, 5);
+            gameState.opponentHandCount = 5;
+            gameState.tableCards = [];
+            gameState.currentPlayer = 'host';
+        }
+
+        function updateGameUI() {
+            document.getElementById('player1Name').textContent = gameState.isHost ? gameState.myNickname : gameState.opponentNickname;
+            document.getElementById('player2Name').textContent = gameState.isHost ? gameState.opponentNickname : gameState.myNickname;
+
+            document.getElementById('player1Hand').textContent = gameState.isHost ? `${gameState.myHand.length} карт` : `${gameState.opponentHandCount} карт`;
+            document.getElementById('player2Hand').textContent = gameState.isHost ? `${gameState.opponentHandCount} карт` : `${gameState.myHand.length} карт`;
+
+            const sessionKey = gameState.isHost ? `host_wins_${gameState.sessionId}` : `guest_wins_${gameState.sessionId}`;
+            gameState.myWins = loadStat(sessionKey, 0);
+            document.getElementById('myWins').textContent = gameState.myWins;
+            document.getElementById('opponentWins').textContent = loadStat(
+                gameState.isHost ? `guest_wins_${gameState.sessionId}` : `host_wins_${gameState.sessionId}`,
+                0
+            );
+            document.getElementById('roundCount').textContent = gameState.round;
+
+            displayTableCards();
+            displayMyCards();
+
+            const isMyTurn = (gameState.isHost && gameState.currentPlayer === 'host') || 
+                           (!gameState.isHost && gameState.currentPlayer === 'guest');
+            document.getElementById('gameStatus').textContent = isMyTurn ? '🎯 Ваш хід' : '⏳ Хід супротивника';
+        }
+
+        function displayTableCards() {
+            const tableDiv = document.getElementById('tableCards');
+            tableDiv.innerHTML = '';
+
+            gameState.tableCards.forEach(card => {
+                const img = document.createElement('img');
+                img.src = card.canvas.toDataURL();
+                img.className = `card-on-table ${card.isTrump ? 'trump' : ''}`;
+                tableDiv.appendChild(img);
+            });
+        }
+
+        function displayMyCards() {
+            const cardsDiv = document.getElementById('myCards');
+            cardsDiv.innerHTML = '';
+
+            gameState.myHand.forEach((card, idx) => {
+                const img = document.createElement('img');
+                img.src = card.canvas.toDataURL();
+                img.className = `card-in-hand ${card.isTrump ? 'trump' : ''} ${gameState.selectedCard === idx ? '' : ''}`;
+                img.style.opacity = gameState.selectedCard === idx ? '1' : '0.9';
+                img.style.transform = gameState.selectedCard === idx ? 'scale(1.05)' : 'scale(1)';
+                img.onclick = () => selectCard(idx);
+                cardsDiv.appendChild(img);
+            });
+        }
+
+        function selectCard(index) {
+            gameState.selectedCard = gameState.selectedCard === index ? null : index;
+            displayMyCards();
+        }
+
+        function playCard() {
+            if (gameState.selectedCard === null) {
+                alert('Виберіть карту');
+                return;
+            }
+
+            const card = gameState.myHand[gameState.selectedCard];
+
+            if (card.isTrump && gameState.myHand.length === 1) {
+                alert('Не можете кинути козиря останньою картою');
+                return;
+            }
+
+            gameState.tableCards.push(card);
+            gameState.myHand.splice(gameState.selectedCard, 1);
+            gameState.selectedCard = null;
+
+            gameState.currentPlayer = gameState.currentPlayer === 'host' ? 'guest' : 'host';
+            
+            syncGameState();
+            updateGameUI();
+        }
+
+        function beatCard() {
+            if (gameState.selectedCard === null) {
+                alert('Виберіть карту для биття');
+                return;
+            }
+
+            if (gameState.tableCards.length === 0) {
+                alert('Немає карти на столі для биття');
+                return;
+            }
+
+            const selectedCard = gameState.myHand[gameState.selectedCard];
+            const tableCard = gameState.tableCards[gameState.tableCards.length - 1];
+
+            const canBeat = (selectedCard.isTrump && !tableCard.isTrump) || 
+                          (selectedCard.imageIndex === tableCard.imageIndex);
+
+            if (!canBeat) {
+                alert('Не можете бити цією картою');
+                return;
+            }
+
+            gameState.tableCards.pop();
+            gameState.myHand.splice(gameState.selectedCard, 1);
+            gameState.selectedCard = null;
+
+            gameState.currentPlayer = gameState.currentPlayer === 'host' ? 'guest' : 'host';
+            
+            syncGameState();
+            updateGameUI();
+        }
+
+        function takeCards() {
+            gameState.myHand.push(...gameState.tableCards);
+            gameState.tableCards = [];
+            gameState.selectedCard = null;
+
+            if (gameState.myHand.length >= 10) {
+                endRound();
+            } else {
+                syncGameState();
+                updateGameUI();
+            }
+        }
+
+        function endRound() {
+            const isMyWin = gameState.myHand.length === 0;
+            
+            if (isMyWin) {
+                gameState.myWins++;
+                const sessionKey = gameState.isHost ? `host_wins_${gameState.sessionId}` : `guest_wins_${gameState.sessionId}`;
+                saveStat(sessionKey, gameState.myWins);
+            } else {
+                const opponentKey = gameState.isHost ? `guest_wins_${gameState.sessionId}` : `host_wins_${gameState.sessionId}`;
+                const opponentWins = loadStat(opponentKey, 0) + 1;
+                saveStat(opponentKey, opponentWins);
+            }
+
+            document.getElementById('resultWinner').textContent = isMyWin ? '🎉 Ви виграли!' : '😔 Ви програли';
+            document.getElementById('resultPlayer1').textContent = gameState.isHost ? gameState.myNickname : gameState.opponentNickname;
+            document.getElementById('resultPlayer2').textContent = gameState.isHost ? gameState.opponentNickname : gameState.myNickname;
+
+            showScreen('result');
+        }
+
+        function nextRound() {
+            gameState.round++;
+            gameState.myHand = [];
+            gameState.opponentHandCount = 0;
+            gameState.tableCards = [];
+            gameState.selectedCard = null;
+
+            createDeck();
+            shuffleDeck();
+            dealCards();
+
+            updateGameUI();
+            showScreen('game');
+        }
+
+        function syncGameState() {
+            const state = {
+                myHand: gameState.myHand.length,
+                opponentHand: gameState.opponentHandCount,
+                tableCards: gameState.tableCards.length,
+                currentPlayer: gameState.currentPlayer
+            };
+            localStorage.setItem(`game_state_${gameState.sessionId}`, JSON.stringify(state));
+        }
+
+        function copyLink() {
+            const link = document.getElementById('linkBox').textContent;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopy(link);
+                });
+            } else {
+                fallbackCopy(link);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            document.body.appendChild(textarea);
+            
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                alert('Посилання: ' + text);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        function showCopySuccess() {
+            const msg = document.getElementById('copySuccess');
+            msg.textContent = '✅ Посилання скопійовано!';
+            setTimeout(() => {
+                msg.textContent = '';
+            }, 2000);
+        }
+
+        function cancelGame() {
+            localStorage.removeItem(`guest_ready_${gameState.sessionId}`);
+            localStorage.removeItem(`guest_nickname_${gameState.sessionId}`);
+            localStorage.removeItem(`game_data_${gameState.sessionId}`);
+            goToMenu();
+        }
+
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('nickname');
+            if (saved) {
+                document.getElementById('nicknameInput').value = saved;
+            }
+        });
+    </script>
+</body>
+</html>
