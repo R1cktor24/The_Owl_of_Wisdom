@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карткова гра</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -455,7 +459,7 @@
             </div>
         </div>
 
-        <!-- ЭКРАН 3: Завантаження картинок (тільки для першого гравця) -->
+        <!-- ЭКРАН 3: Завантаження картинок -->
         <div id="upload" class="screen">
             <h2>Завантажте картинки</h2>
             <p style="text-align: center; margin-bottom: 20px; color: #666;">
@@ -535,7 +539,7 @@
             </div>
 
             <div class="hand-area">
-                <div class="hand-label">В��ші карти:</div>
+                <div class="hand-label">Ваші карти:</div>
                 <div id="myCards" class="hand-cards"></div>
             </div>
 
@@ -568,6 +572,16 @@
     </div>
 
     <script>
+        // ===== FIREBASE КОНФІГ =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyABCDEF1234567890GHIJKLMNOP",
+            authDomain: "card-game-demo.firebaseapp.com",
+            projectId: "card-game-demo",
+            storageBucket: "card-game-demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef1234567890"
+        };
+
         // ===== ГЛОБАЛЬНІ ЗМІННІ =====
         let gameState = {
             isHost: false,
@@ -585,10 +599,28 @@
             currentPlayer: 'host',
             gameActive: false,
             selectedCard: null,
-            sessionId: ''
+            sessionId: '',
+            myPlayerId: '',
+            opponentPlayerId: ''
         };
 
+        let db = null;
+        let gameRef = null;
         const CARD_SCALE = 0.5;
+
+        // ===== ІНІЦІАЛІЗАЦІЯ FIREBASE =====
+        async function initFirebase() {
+            try {
+                const app = firebase.initializeApp(firebaseConfig);
+                db = firebase.database(app);
+                console.log('Firebase ініціалізований');
+            } catch (error) {
+                console.log('Firebase помилка:', error.message);
+                // Якщо Firebase не підключається, використовуємо localStorage как fallback
+            }
+        }
+
+        initFirebase();
 
         // ===== УТИЛІТИ =====
         function showScreen(screenId) {
@@ -597,6 +629,9 @@
         }
 
         function goToMenu() {
+            if (gameRef) {
+                gameRef.remove();
+            }
             gameState = {
                 isHost: false,
                 myNickname: '',
@@ -613,7 +648,9 @@
                 currentPlayer: 'host',
                 gameActive: false,
                 selectedCard: null,
-                sessionId: ''
+                sessionId: '',
+                myPlayerId: '',
+                opponentPlayerId: ''
             };
             showScreen('menu');
         }
@@ -630,11 +667,13 @@
         // ===== ЭКРАН 1: МЕНЮ =====
         function startNewGame() {
             gameState.isHost = true;
+            gameState.myPlayerId = generateId();
             showScreen('nickname');
         }
 
         function joinGame() {
             gameState.isHost = false;
+            gameState.myPlayerId = generateId();
             showScreen('nickname');
         }
 
@@ -653,7 +692,7 @@
                 showScreen('upload');
             } else {
                 showScreen('waiting');
-                initPeerAsGuest();
+                waitForGameInvite();
             }
         }
 
@@ -662,6 +701,10 @@
             const imageInput = document.getElementById('imageInput');
             if (imageInput) {
                 imageInput.addEventListener('change', handleImageSelect);
+            }
+            const saved = localStorage.getItem('nickname');
+            if (saved) {
+                document.getElementById('nicknameInput').value = saved;
             }
         });
 
@@ -739,19 +782,60 @@
             }
 
             showScreen('waiting');
-            initPeerAsHost();
+            createGameRoom();
         }
 
-        // ===== WEBRTC ЛОГІКА =====
-        function initPeerAsHost() {
+        // ===== FIREBASE ОПЕРАЦІЇ =====
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function generateSessionId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function createGameRoom() {
             gameState.sessionId = generateSessionId();
             const gameUrl = `${window.location.href.split('?')[0]}?session=${gameState.sessionId}`;
             document.getElementById('linkBox').textContent = gameUrl;
+
+            if (!db) {
+                alert('Firebase недоступний. Спробуйте пізніше.');
+                return;
+            }
+
+            gameRef = db.ref(`games/${gameState.sessionId}`);
             
-            setupHostListener();
+            gameRef.set({
+                host: {
+                    id: gameState.myPlayerId,
+                    nickname: gameState.myNickname,
+                    images: gameState.myImages,
+                    trumpIndex: gameState.trumpIndex,
+                    ready: true
+                },
+                guest: {
+                    id: null,
+                    nickname: null,
+                    ready: false
+                },
+                gameStarted: false,
+                createdAt: new Date().getTime()
+            });
+
+            // Слухаємо гостя
+            gameRef.child('guest').on('value', (snapshot) => {
+                const guest = snapshot.val();
+                if (guest && guest.ready && guest.nickname) {
+                    gameState.opponentNickname = guest.nickname;
+                    gameState.opponentPlayerId = guest.id;
+                    gameRef.child('guest').off();
+                    initializeGame();
+                }
+            });
         }
 
-        function initPeerAsGuest() {
+        function waitForGameInvite() {
             const params = new URLSearchParams(window.location.search);
             const sessionId = params.get('session');
 
@@ -762,64 +846,53 @@
             }
 
             gameState.sessionId = sessionId;
-            setupGuestConnector();
-        }
 
-        function generateSessionId() {
-            return Math.random().toString(36).substr(2, 9);
-        }
+            if (!db) {
+                alert('Firebase недоступний. Спробуйте пізніше.');
+                return;
+            }
 
-        function setupHostListener() {
-            const checkInterval = setInterval(() => {
-                const guestReady = localStorage.getItem(`guest_ready_${gameState.sessionId}`);
-                if (guestReady) {
-                    clearInterval(checkInterval);
-                    localStorage.removeItem(`guest_ready_${gameState.sessionId}`);
-                    gameState.opponentNickname = localStorage.getItem(`guest_nickname_${gameState.sessionId}`);
-                    initializeGame();
+            gameRef = db.ref(`games/${gameState.sessionId}`);
+
+            gameRef.once('value', (snapshot) => {
+                const game = snapshot.val();
+                if (!game) {
+                    alert('Гра не знайдена');
+                    goToMenu();
+                    return;
                 }
-            }, 500);
 
-            setTimeout(() => {
-                clearInterval(checkInterval);
-            }, 30000);
-        }
+                gameState.opponentNickname = game.host.nickname;
+                gameState.opponentPlayerId = game.host.id;
+                gameState.myImages = game.host.images;
+                gameState.trumpIndex = game.host.trumpIndex;
 
-        function setupGuestConnector() {
-            localStorage.setItem(`guest_nickname_${gameState.sessionId}`, gameState.myNickname);
-            localStorage.setItem(`guest_ready_${gameState.sessionId}`, 'true');
+                // Оновлюємо дані гостя
+                gameRef.child('guest').set({
+                    id: gameState.myPlayerId,
+                    nickname: gameState.myNickname,
+                    ready: true
+                });
 
-            const checkInterval = setInterval(() => {
-                const gameData = localStorage.getItem(`game_data_${gameState.sessionId}`);
-                if (gameData) {
-                    clearInterval(checkInterval);
-                    const data = JSON.parse(gameData);
-                    gameState.myImages = data.images;
-                    gameState.trumpIndex = data.trumpIndex;
-                    gameState.opponentNickname = data.hostNickname;
-                    gameState.isHost = false;
-                    initializeGame();
-                }
-            }, 500);
-
-            setTimeout(() => {
-                clearInterval(checkInterval);
-            }, 30000);
+                // Чекаємо старт гри
+                gameRef.child('gameStarted').on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        gameRef.child('gameStarted').off();
+                        initializeGame();
+                    }
+                });
+            });
         }
 
         function initializeGame() {
-            if (gameState.isHost) {
-                const gameData = {
-                    images: gameState.myImages,
-                    trumpIndex: gameState.trumpIndex,
-                    hostNickname: gameState.myNickname
-                };
-                localStorage.setItem(`game_data_${gameState.sessionId}`, JSON.stringify(gameData));
-            }
-
             createDeck();
             shuffleDeck();
             dealCards();
+
+            // Сигналізуємо що гра почалась
+            if (gameState.isHost) {
+                gameRef.child('gameStarted').set(true);
+            }
 
             updateGameUI();
             showScreen('game');
@@ -928,7 +1001,7 @@
             gameState.myHand.forEach((card, idx) => {
                 const img = document.createElement('img');
                 img.src = card.canvas.toDataURL();
-                img.className = `card-in-hand ${card.isTrump ? 'trump' : ''} ${gameState.selectedCard === idx ? '' : ''}`;
+                img.className = `card-in-hand ${card.isTrump ? 'trump' : ''}`;
                 img.style.opacity = gameState.selectedCard === idx ? '1' : '0.9';
                 img.style.transform = gameState.selectedCard === idx ? 'scale(1.05)' : 'scale(1)';
                 img.onclick = () => selectCard(idx);
@@ -960,7 +1033,6 @@
 
             gameState.currentPlayer = gameState.currentPlayer === 'host' ? 'guest' : 'host';
             
-            syncGameState();
             updateGameUI();
         }
 
@@ -992,7 +1064,6 @@
 
             gameState.currentPlayer = gameState.currentPlayer === 'host' ? 'guest' : 'host';
             
-            syncGameState();
             updateGameUI();
         }
 
@@ -1004,7 +1075,6 @@
             if (gameState.myHand.length >= 10) {
                 endRound();
             } else {
-                syncGameState();
                 updateGameUI();
             }
         }
@@ -1042,16 +1112,6 @@
 
             updateGameUI();
             showScreen('game');
-        }
-
-        function syncGameState() {
-            const state = {
-                myHand: gameState.myHand.length,
-                opponentHand: gameState.opponentHandCount,
-                tableCards: gameState.tableCards.length,
-                currentPlayer: gameState.currentPlayer
-            };
-            localStorage.setItem(`game_state_${gameState.sessionId}`, JSON.stringify(state));
         }
 
         function copyLink() {
@@ -1099,18 +1159,11 @@
         }
 
         function cancelGame() {
-            localStorage.removeItem(`guest_ready_${gameState.sessionId}`);
-            localStorage.removeItem(`guest_nickname_${gameState.sessionId}`);
-            localStorage.removeItem(`game_data_${gameState.sessionId}`);
+            if (gameRef) {
+                gameRef.remove();
+            }
             goToMenu();
         }
-
-        window.addEventListener('load', () => {
-            const saved = localStorage.getItem('nickname');
-            if (saved) {
-                document.getElementById('nicknameInput').value = saved;
-            }
-        });
     </script>
 </body>
 </html>
