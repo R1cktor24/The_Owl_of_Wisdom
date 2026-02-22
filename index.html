@@ -573,16 +573,16 @@
 
     <script>
         // ===== FIREBASE КОНФІГ =====
-     const firebaseConfig = {
-  apiKey: "AIzaSyCKNoPtI9V51v4Keobq7KxQTU839H3Yjtg",
-  authDomain: "the-owl-of-wisdom.firebaseapp.com",
-  databaseURL: "https://the-owl-of-wisdom-default-rtdb.firebaseio.com",
-  projectId: "the-owl-of-wisdom",
-  storageBucket: "the-owl-of-wisdom.firebasestorage.app",
-  messagingSenderId: "163707395119",
-  appId: "1:163707395119:web:488a5c2e5caad4a3627ada",
-  measurementId: "G-R8VSM2YYJP"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKNoPtI9V51v4KeobqjKxQTU839H3Yjtg",
+            authDomain: "the-owl-of-wisdom.firebaseapp.com",
+            databaseURL: "https://the-owl-of-wisdom-default-rtdb.firebaseio.io",
+            projectId: "the-owl-of-wisdom",
+            storageBucket: "the-owl-of-wisdom.firebasestorage.app",
+            messagingSenderId: "163707395119",
+            appId: "1:163707395119:web:488a5c2e5caad4a3627ada",
+            measurementId: "G-R8VSM2YYJP"
+        };
 
         // ===== ГЛОБАЛЬНІ ЗМІННІ =====
         let gameState = {
@@ -611,18 +611,18 @@
         const CARD_SCALE = 0.5;
 
         // ===== ІНІЦІАЛІЗАЦІЯ FIREBASE =====
-        async function initFirebase() {
+        function initFirebase() {
             try {
                 const app = firebase.initializeApp(firebaseConfig);
                 db = firebase.database(app);
-                console.log('Firebase ініціалізований');
+                console.log('✅ Firebase ініціалізований');
             } catch (error) {
-                console.log('Firebase помилка:', error.message);
-                // Якщо Firebase не підключається, використовуємо localStorage как fallback
+                console.error('❌ Firebase помилка:', error.message);
+                alert('Firebase помилка: ' + error.message);
             }
         }
 
-        initFirebase();
+        window.addEventListener('load', initFirebase);
 
         // ===== УТИЛІТИ =====
         function showScreen(screenId) {
@@ -802,7 +802,7 @@
             document.getElementById('linkBox').textContent = gameUrl;
 
             if (!db) {
-                alert('Firebase недоступний. Спробуйте пізніше.');
+                alert('Firebase не доступний');
                 return;
             }
 
@@ -850,7 +850,7 @@
             gameState.sessionId = sessionId;
 
             if (!db) {
-                alert('Firebase недоступний. Спробуйте пізніше.');
+                alert('Firebase не доступний');
                 return;
             }
 
