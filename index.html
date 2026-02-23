@@ -297,7 +297,9 @@
             <div style="color:#999;font-size:0.8em">перемог</div>
         </div>
     </div>
-    <button class="btn-primary" onclick="location.reload()">🔄 Нова гра</button>
+    <button class="btn-primary" id="btn-replay" onclick="requestReplay()">🔄 Нова партія</button>
+    <div id="replay-status" style="text-align:center;color:#667eea;margin-top:10px;min-height:22px;font-weight:bold;"></div>
+    <button class="btn-danger" style="margin-top:10px;" onclick="location.reload()">🚪 Вийти</button>
 </div>
 
 </div><!-- /container -->
@@ -444,6 +446,12 @@ function copyCode() {
 
 function cancelGame() { if (ws) ws.close(); showScreen('screen-menu'); }
 
+function requestReplay() {
+    document.getElementById('btn-replay').disabled = true;
+    document.getElementById('replay-status').textContent = '⏳ Чекаємо суперника...';
+    sendWS({ type: 'replay' });
+}
+
 function selectCard(idx) {
     if (phase !== 'attack' && phase !== 'defend') return;
     selectedCardIdx = selectedCardIdx === idx ? null : idx;
@@ -500,16 +508,7 @@ function handleMessage(data) {
             });
             break;
 
-        case 'game-start':
-            myRole = data.role;
-            trumpImg = data.trumpImg;
-            // Якщо гість — картинки вже завантажуються, чекаємо
-            if (myRole === 'guest') {
-                waitImagesAndStart(data);
-            } else {
-                startGameUI(data);
-            }
-            break;
+
 
         case 'attack-sent':
             myHand = data.hand;
@@ -558,13 +557,39 @@ function handleMessage(data) {
             break;
 
         case 'game-over':
-            const iWon = data.winner === myRole;
-            if (iWon) myWins++; else opWins++;
-            showResult(iWon);
+            // Рахунок приходить з сервера
+            myWins = myRole === 'host' ? data.hostWins : data.guestWins;
+            opWins = myRole === 'host' ? data.guestWins : data.hostWins;
+            showResult(data.winner === myRole);
             break;
 
         case 'opponent-left':
             showResult(true);
+            break;
+
+        case 'waiting-replay':
+            document.getElementById('replay-status').textContent = '⏳ Чекаємо суперника...';
+            document.getElementById('btn-replay').disabled = true;
+            break;
+
+        case 'opponent-ready-replay':
+            document.getElementById('replay-status').textContent = '✅ Суперник готовий! Натискай "Нова партія"';
+            break;
+
+        case 'game-start':
+            myRole = data.role;
+            trumpImg = data.trumpImg;
+            if (data.images) CARD_IMAGES_B64 = data.images;
+            if (data.hostWins !== undefined) {
+                myWins = myRole === 'host' ? data.hostWins : data.guestWins;
+                opWins = myRole === 'host' ? data.guestWins : data.hostWins;
+            }
+            // Якщо гість і картинки ще не завантажені — чекаємо
+            if (myRole === 'guest' && loadedImages.filter(Boolean).length < 5) {
+                waitImagesAndStart(data);
+            } else {
+                startGameUI(data);
+            }
             break;
     }
 }
@@ -588,17 +613,22 @@ function startGameUI(data) {
 
     document.getElementById('player1Name').textContent = myNick;
     document.getElementById('player2Name').textContent = opNick;
+    setupTrumpCanvas();
+    renderAll();
+    // Скидаємо UI результату для наступної партії
+    document.getElementById('btn-replay').disabled = false;
+    document.getElementById('replay-status').textContent = '';
+    showScreen('screen-game');
+}
 
-    // Козир превью
+function setupTrumpCanvas() {
     const trumpCanvas = document.getElementById('trump-canvas');
     const tCtx = trumpCanvas.getContext('2d');
+    tCtx.clearRect(0, 0, 30, 45);
     const tImg = loadedImages[trumpImg];
     if (tImg) {
         tCtx.drawImage(tImg, 0, 0, tImg.naturalWidth / 2, tImg.naturalHeight, 0, 0, 30, 45);
     }
-
-    renderAll();
-    showScreen('screen-game');
 }
 
 // ======= RENDER =======
