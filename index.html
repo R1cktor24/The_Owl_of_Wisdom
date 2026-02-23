@@ -8,22 +8,18 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(160deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 0;
+            padding: 12px;
         }
         .container {
             max-width: 500px;
             margin: 0 auto;
-            background: white;
-            border-radius: 0;
+            background: #f9f8ff;
+            border-radius: 20px;
             padding: 16px;
-            min-height: 100vh;
-            box-shadow: none;
-        }
-        @media (min-width: 520px) {
-            body { padding: 10px; }
-            .container { border-radius: 15px; min-height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+            min-height: calc(100vh - 24px);
+            box-shadow: 0 8px 32px rgba(80,0,120,0.25);
         }
         .screen { display: none; }
         .screen.active { display: block; animation: slideIn 0.3s ease; }
@@ -112,18 +108,23 @@
         /* GAME */
         .game-header {
             display:flex; justify-content:space-between; align-items:center;
-            margin-bottom:12px; padding-bottom:12px; border-bottom:2px solid #eee;
+            margin-bottom:12px; padding:12px 16px;
+            background: linear-gradient(135deg, #667eea11, #764ba211);
+            border-radius: 14px;
+            border: 1px solid rgba(102,126,234,0.15);
         }
         .player-info { text-align:center; flex:1; }
-        .player-name { font-weight:bold; font-size:1em; color:#333; }
-        .player-hand-count { color:#666; font-size:0.85em; margin-top:4px; }
-        .vs-text { color:#999; margin:0 8px; }
+        .player-name { font-weight:bold; font-size:1.05em; color:#333; }
+        .player-hand-count { color:#888; font-size:0.82em; margin-top:3px; }
+        .vs-text { color:#999; margin:0 8px; font-size:1.3em; }
 
         .trump-bar {
             display:flex; align-items:center; gap:10px;
-            background:#fffbeb; border:1px solid #f6ad55;
-            border-radius:8px; padding:8px 12px; margin-bottom:12px;
+            background: linear-gradient(135deg, #fffbeb, #fff8e1);
+            border:1.5px solid #f6ad55;
+            border-radius:12px; padding:10px 14px; margin-bottom:12px;
             font-size:0.9em; color:#744210; font-weight:bold;
+            box-shadow: 0 2px 8px rgba(246,173,85,0.2);
         }
         .trump-thumb {
             width:30px; height:45px; border-radius:5px;
@@ -132,26 +133,32 @@
         .trump-thumb canvas { width:100%; height:100%; display:block; }
 
         .table-area {
-            background:#2d5016; border-radius:15px; padding:15px;
-            min-height:150px; margin-bottom:12px;
+            background: linear-gradient(145deg, #2d6b1a, #1a4010);
+            border-radius:18px; padding:20px;
+            min-height:190px; margin-bottom:14px;
             display:flex; flex-direction:column;
-            justify-content:center; align-items:center; gap:10px;
+            justify-content:center; align-items:center; gap:12px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15);
         }
         .game-status {
             color:white; font-weight:bold;
-            background:rgba(255,255,255,0.15); padding:5px 16px; border-radius:20px;
+            background:rgba(255,255,255,0.18);
+            backdrop-filter: blur(4px);
+            padding:8px 20px; border-radius:30px;
             font-size:0.95em;
+            border: 1px solid rgba(255,255,255,0.25);
+            letter-spacing: 0.3px;
         }
         .table-cards { display:flex; gap:8px; justify-content:center; min-height:70px; align-items:center; }
-        .card-on-table { height:115px; border-radius:8px; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+        .card-on-table { height:130px; border-radius:10px; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
         .card-on-table.trump { border-color:#f6ad55; box-shadow:0 0 10px rgba(246,173,85,0.7); }
 
         .opponent-cards { display:none; }
         .card-back { display:none; }
 
-        .my-cards { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:12px; min-height:115px; }
+        .my-cards { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:14px; min-height:130px; }
         .card-in-hand {
-            height:115px; border-radius:8px; cursor:pointer;
+            height:130px; border-radius:10px; cursor:pointer;
             border:2px solid transparent; transition:transform 0.15s, box-shadow 0.15s;
             box-shadow:0 2px 6px rgba(0,0,0,0.2);
         }
@@ -160,7 +167,8 @@
         .card-in-hand.trump { border-color:#f6ad55; }
         .card-in-hand.trump.selected { border-color:#ed8936; box-shadow:0 6px 18px rgba(246,173,85,0.6); }
 
-        .action-buttons { display:flex; gap:10px; }
+        .action-buttons { display:flex; gap:10px; margin-top:4px; }
+        .btn-action { border-radius:14px !important; padding:15px !important; font-size:1.05em !important; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .error-msg { color:#f56565; text-align:center; font-weight:bold; min-height:22px; margin:8px 0; }
 
         /* RESULT */
@@ -255,7 +263,10 @@
             <div class="player-name" id="player1Name">Гравець 1</div>
             <div class="player-hand-count" id="player1Hand">5 карт</div>
         </div>
-        <div class="vs-text">⚔️<div style="font-size:0.55em;color:#bbb;font-weight:normal;letter-spacing:1px;margin-top:3px;">Думайте</div></div>
+        <div class="vs-text" style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <span>⚔️</span>
+            <span style="font-size:0.7em;color:#aaa;font-weight:normal;letter-spacing:2px;">Думайте</span>
+        </div>
         <div class="player-info">
             <div class="player-name" id="player2Name">Гравець 2</div>
             <div class="player-hand-count" id="player2Hand">5 карт</div>
@@ -402,7 +413,7 @@ function makeCardCanvas(imgIdx, half, w, h) {
 }
 
 function cardToDataURL(imgIdx, half) {
-    return makeCardCanvas(imgIdx, half, 75, 115).toDataURL();
+    return makeCardCanvas(imgIdx, half, 85, 130).toDataURL();
 }
 
 // ======= WEBSOCKET =======
