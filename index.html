@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Сова Мудрості 🦉</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(160deg, #667eea 0%, #764ba2 100%);
@@ -33,6 +33,10 @@
             padding:15px 20px; font-size:1.1em; border:none;
             border-radius:10px; cursor:pointer; transition:all 0.3s;
             font-weight:bold; color:white;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
         button:active { transform:scale(0.95); }
         button:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
@@ -161,6 +165,10 @@
             height:130px; border-radius:10px; cursor:pointer;
             border:2px solid transparent; transition:transform 0.15s, box-shadow 0.15s;
             box-shadow:0 2px 6px rgba(0,0,0,0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .card-in-hand:active { transform:scale(0.95); }
         .card-in-hand.selected { transform:translateY(-12px); border-color:#667eea; box-shadow:0 6px 18px rgba(102,126,234,0.5); }
@@ -168,7 +176,17 @@
         .card-in-hand.trump.selected { border-color:#ed8936; box-shadow:0 6px 18px rgba(246,173,85,0.6); }
 
         .action-buttons { display:flex; gap:10px; margin-top:4px; }
-        .btn-action { border-radius:14px !important; padding:15px !important; font-size:1.05em !important; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-action {
+            flex:1;
+            border-radius:14px !important;
+            padding:15px 8px !important;
+            font-size:1.05em !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            z-index: 10;
+        }
         .error-msg { color:#f56565; text-align:center; font-weight:bold; min-height:22px; margin:8px 0; }
 
         /* RESULT */
